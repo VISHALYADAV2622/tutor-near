@@ -378,9 +378,12 @@ function TeacherCard({
               <span>· Active {t.active === 0 ? "today" : `${t.active}d ago`}</span>
             </div>
             <div className="flex gap-2">
-              <button className="px-4 py-1.5 text-sm font-medium rounded-xl border border-gray-200 text-gray-700 hover:bg-gray-50 transition-all">
+              <Link
+                href={`/teacher/${t.id}`}
+                className="px-4 py-1.5 text-sm font-medium rounded-xl border border-gray-200 text-gray-700 hover:bg-gray-50 transition-all"
+              >
                 View Profile
-              </button>
+              </Link>
               <button
                 className="px-4 py-1.5 text-sm font-semibold rounded-xl text-white transition-all hover:opacity-90"
                 style={{ background: ORANGE }}
