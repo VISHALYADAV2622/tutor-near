@@ -123,10 +123,50 @@ class AuthService {
     });
   }
 
-  forgotPassword(email: string) {
-    return api.post(API.FORGOT_PASSWORD, {
-      email,
-    });
+  async sendResetPasswordOTP(email: string) {
+    try {
+      const res = await api.post(API.RESET_PASSWORD, { email });
+      return res.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw new Error(
+          error.response?.data?.error ||
+            error.response?.data?.detail ||
+            error.response?.data?.message ||
+            "Unable to send OTP.",
+        );
+      }
+
+      throw new Error("Something went wrong.");
+    }
+  }
+
+  async verifyResetPassword(
+    email: string,
+    otp: string,
+    password: string,
+    confirmPassword: string,
+  ) {
+    try {
+      const res = await api.post(API.VERIFY_RESET_PASSWORD, {
+        email,
+        otp,
+        password,
+        confirm_password: confirmPassword,
+      });
+      return res.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw new Error(
+          error.response?.data?.error ||
+            error.response?.data?.detail ||
+            error.response?.data?.message ||
+            "Unable to reset password.",
+        );
+      }
+
+      throw new Error("Something went wrong.");
+    }
   }
 
   logout() {

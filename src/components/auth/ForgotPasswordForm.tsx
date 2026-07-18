@@ -14,6 +14,7 @@ import Link from "next/link";
 import { AiOutlineMail, AiOutlineCheckCircle } from "react-icons/ai";
 import OTPInput from "./OTPInput";
 import PasswordInput from "./PasswordInput";
+import AuthService from "@/services/auth.service";
 import {
   forgotPasswordEmailSchema,
   ForgotPasswordEmailData,
@@ -32,6 +33,8 @@ export default function ForgotPasswordForm() {
   const [sentEmail, setSentEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [otpError, setOtpError] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [resetError, setResetError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [timer, setTimer] = useState(0);
 
@@ -58,38 +61,50 @@ export default function ForgotPasswordForm() {
 
   const sendOTP = async (data: ForgotPasswordEmailData) => {
     setIsLoading(true);
-    await new Promise((r) => setTimeout(r, 1200));
-    setSentEmail(data.email);
-    setStep("otp");
-    setTimer(OTP_RESEND_SECONDS);
-    setIsLoading(false);
+    setEmailError("");
+    try {
+      await AuthService.sendResetPasswordOTP(data.email);
+      setSentEmail(data.email);
+      setStep("otp");
+      setTimer(OTP_RESEND_SECONDS);
+    } catch (error) {
+      setEmailError(error instanceof Error ? error.message : "Unable to send OTP.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const resendOTP = async () => {
     setIsLoading(true);
     setOtp("");
     setOtpError("");
-    await new Promise((r) => setTimeout(r, 1000));
-    setTimer(OTP_RESEND_SECONDS);
-    setIsLoading(false);
+    try {
+      await AuthService.sendResetPasswordOTP(sentEmail);
+      setTimer(OTP_RESEND_SECONDS);
+    } catch (error) {
+      setOtpError(error instanceof Error ? error.message : "Unable to resend OTP.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const verifyOTP = async () => {
+  const verifyOTP = () => {
     if (otp.length < 6) { setOtpError("Enter all 6 digits of the OTP"); return; }
-    setIsLoading(true);
     setOtpError("");
-    await new Promise((r) => setTimeout(r, 1200));
-    console.log("Verified OTP:", otp);
     setStep("reset");
-    setIsLoading(false);
   };
 
   const resetPassword = async (data: ResetPasswordData) => {
     setIsLoading(true);
-    await new Promise((r) => setTimeout(r, 1400));
-    console.log("Reset password for:", sentEmail, data.newPassword);
-    setStep("success");
-    setIsLoading(false);
+    setResetError("");
+    try {
+      await AuthService.verifyResetPassword(sentEmail, otp, data.newPassword, data.confirmPassword);
+      setStep("success");
+    } catch (error) {
+      setResetError(error instanceof Error ? error.message : "Unable to reset password.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Step progress indicator
@@ -190,6 +205,12 @@ export default function ForgotPasswordForm() {
             )}
           </button>
 
+          {emailError && (
+            <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">
+              {emailError}
+            </div>
+          )}
+
           <p className="text-center text-sm text-gray-500">
             Remembered it?{" "}
             <Link href="/login" className="font-semibold hover:underline" style={{ color: RED }}>Back to login</Link>
@@ -282,6 +303,12 @@ export default function ForgotPasswordForm() {
               "Reset Password"
             )}
           </button>
+
+          {resetError && (
+            <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">
+              {resetError}
+            </div>
+          )}
         </form>
       )}
 
