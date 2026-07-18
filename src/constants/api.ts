@@ -5,6 +5,6 @@ export const API = {
   LOGIN_OTP: "/auth/loginotp/",
   VERIFY_LOGIN_OTP: "/auth/verifyloginotp/",
   FORGOT_PASSWORD: "/auth/forgotpassword/",
-   EMAIL_SEND_OTP: "/auth/emailsendotp/",
+  EMAIL_SEND_OTP: "/auth/emailsendotp/",
   VERIFY_EMAIL_OTP: "/auth/verifyemailotp/",
 };
